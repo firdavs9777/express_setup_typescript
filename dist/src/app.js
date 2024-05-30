@@ -12,7 +12,7 @@ const app = (0, express_1.default)();
 const cors = require('cors');
 // Dotenv implemented and imported
 dotenv_1.default.config();
-const port = parseInt(process.env.PORT || '5002', 10);
+// const port:number = parseInt(process.env.PORT || '5002', 10);
 app.use((0, body_parser_1.json)());
 app.use('/todos', todos_1.default);
 app.use(cors);
@@ -31,4 +31,4 @@ app.get('/api/v1/products/:id', (req, res) => {
     const product = products_1.products.find((p) => p.id === id);
     res.json(product);
 });
-app.listen(port, () => console.log(`Server is running on port ${port}`));
+app.listen(5000, () => console.log(`Server is running on port ${5000}`));
