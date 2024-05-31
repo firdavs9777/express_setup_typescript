@@ -4,8 +4,8 @@
   "description": "Typescript with Node Express",
   "main": "index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon dist/app.js"
+    "start": "nodemon",
+    "dev": "nodemon"
   },
   "author": "Davis",
   "license": "ISC",
@@ -14,13 +14,13 @@
     "@types/node": "^20.12.5",
     "concurrently": "^8.2.2",
     "express": "^5.0.0-beta.2",
+    "nodemon": "^3.1.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.4"
   },
   "dependencies": {
     "body-parser": "^2.0.0-beta.2",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "nodemon": "^3.1.0"
+    "dotenv": "^16.4.5"
   }
 }

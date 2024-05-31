@@ -7,7 +7,7 @@ const express_1 = __importDefault(require("express"));
 const todos_1 = __importDefault(require("./routes/todos"));
 const body_parser_1 = require("body-parser");
 const dotenv_1 = __importDefault(require("dotenv"));
-const products_1 = require("../data/products");
+const products_1 = require("./data/products");
 const app = (0, express_1.default)();
 const cors = require('cors');
 // Dotenv implemented and imported
@@ -15,7 +15,7 @@ dotenv_1.default.config();
 // const port:number = parseInt(process.env.PORT || '5002', 10);
 app.use((0, body_parser_1.json)());
 app.use('/todos', todos_1.default);
-app.use(cors);
+app.use(cors());
 app.use((err, req, res, next) => {
     res.status(500).json({ message: err.message });
 });
@@ -31,4 +31,4 @@ app.get('/api/v1/products/:id', (req, res) => {
     const product = products_1.products.find((p) => p.id === id);
     res.json(product);
 });
-app.listen(5000, () => console.log(`Server is running on port ${5000}`));
+app.listen(5002, () => console.log(`Server is running on port ${5002}`));
