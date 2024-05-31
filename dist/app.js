@@ -18,7 +18,4 @@ app.use('/todos', todos_1.default);
 app.use((err, req, res, next) => {
     res.status(500).json({ message: err.message });
 });
-app.get('/', (req, res) => {
-    res.send('Api is running');
-});
-app.listen(port, () => console.log(`Server is running on port ${port}`));
+app.listen(3000);
