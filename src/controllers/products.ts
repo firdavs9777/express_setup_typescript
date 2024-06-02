@@ -1,12 +1,25 @@
 import { RequestHandler } from 'express';
 import Product from '../models/product';
+import { ProductType } from '../data/products';
+
+interface DataType {
+    data: ProductType[],
+    message: string;
+    count: number;
+}
 //@desc: Fetch All Products
 //@route GET /api/v1/products
 //@access: Public
 export const getProducts: RequestHandler = async (req, res, next) => {
     try {
         const products = await Product.find();
-        res.json(products);
+        const responseData: DataType = {
+            count: products.length,
+            data: products,
+            message: 'success'
+          };
+          res.json(responseData);
+
       } catch (error: any | object) {
         res.status(404);
         throw new Error(error.mesage)
