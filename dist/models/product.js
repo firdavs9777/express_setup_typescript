@@ -1,15 +1,4 @@
 "use strict";
-// import mongoose, {Schema, Document} from "mongoose";
-// interface Iuser extends Document {
-//   name: string;
-//   email: string;
-// }
-// const UserSchema: Schema = new Schema({
-//   name: { type: String, required: true },
-//   email: { type: String, required: true }
-// });
-// const User = mongoose.model<Iuser>('User', UserSchema);
-// export default User;
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -33,12 +22,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
-const review_1 = __importDefault(require("./review"));
+const review_1 = require("./review");
 const ProductSchema = new mongoose_1.Schema({
     user: {
         type: mongoose_1.Schema.Types.ObjectId,
@@ -50,7 +36,7 @@ const ProductSchema = new mongoose_1.Schema({
     brand: { type: String, required: true },
     category: { type: String, required: true },
     description: { type: String, required: true },
-    reviews: [review_1.default],
+    reviews: [review_1.ReviewSchema],
     rating: { type: Number, required: true },
     numReviews: {
         type: Number, required: true, default: 0

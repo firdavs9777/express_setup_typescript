@@ -1,17 +1,7 @@
-// import mongoose, {Schema, Document} from "mongoose";
-// interface Iuser extends Document {
-//   name: string;
-//   email: string;
-// }
-// const UserSchema: Schema = new Schema({
-//   name: { type: String, required: true },
-//   email: { type: String, required: true }
-// });
-// const User = mongoose.model<Iuser>('User', UserSchema);
-// export default User;
+
 
 import mongoose, { Document, Schema } from "mongoose";
-import Review from "./review";
+import { IReview, ReviewSchema } from "./review";
 
 interface Iproduct extends Document {
   name: string;
@@ -19,7 +9,7 @@ interface Iproduct extends Document {
   brand: string;
   category: string;
   description: string;
-  reviews: object;
+  reviews: IReview[];
   rating: number;
   numReviews: number;
   price: number;
@@ -37,7 +27,7 @@ const ProductSchema: Schema = new Schema({
   brand: { type: String, required: true },
   category: { type: String, required: true },
   description: { type: String, required: true },
-  reviews: [Review],
+  reviews: [ReviewSchema],
   rating: { type: Number, required: true },
   numReviews: {
     type: Number, required:true, default:0

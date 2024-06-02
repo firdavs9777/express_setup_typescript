@@ -28,4 +28,4 @@ app.get('/api/v1/products/:id', function (req, res) {
     var product = products_1.products.find(function (p) { return p.id === id; });
     res.json(product);
 });
-app.listen(5001, function () { return console.log("Server is running on port ".concat(5001)); });
+app.listen(5004, function () { return console.log("Server is running on port ".concat(5004)); });
