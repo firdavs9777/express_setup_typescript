@@ -5,22 +5,40 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getUserProfile = exports.deleteUser = exports.updateUserProfile = exports.updateUser = exports.getUserById = exports.getUsers = exports.logoutUser = exports.registerUser = exports.loginUser = void 0;
 const users_1 = __importDefault(require("../models/users"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+console.log(jsonwebtoken_1.default);
 // @desc: Auth User & get token
 // @route Post /api/v1/users/login
 // @access: Public
 const loginUser = async (req, res, next) => {
     const { email, password } = req.body;
-    const user = await users_1.default.findOne({ email });
-    if (user) {
-        const responseData = {
-            data: user,
-            message: 'success'
-        };
-        res.json(responseData);
-    }
-    else {
+    try {
+        const user = await users_1.default.findOne({ email });
+        if (user && user.matchPassword) {
+            const passwordMatched = await user.matchPassword(password);
+            if (passwordMatched) {
+                const token = jsonwebtoken_1.default.sign({ userId: user._id }, process.env.JWT_SECRET, {
+                    expiresIn: '30d',
+                });
+                res.cookie('jwt', token, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV !== 'development',
+                    sameSite: 'strict',
+                    maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+                });
+                const responseData = {
+                    token: token,
+                    message: 'success'
+                };
+                res.json(responseData);
+            }
+        }
         res.status(401);
         throw new Error('Error happened above api link');
+    }
+    catch (error) {
+        res.status(401);
+        throw new Error(error.message);
     }
 };
 exports.loginUser = loginUser;

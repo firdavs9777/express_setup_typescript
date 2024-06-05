@@ -1,4 +1,6 @@
 import mongoose, { Document, Schema } from "mongoose";
+import bcrypt from 'bcryptjs';
+
 
 interface IUser extends Document { 
   name: string,
@@ -10,10 +12,10 @@ const UserSchema: Schema = new Schema({
   name: {
     type: String,
     required: true
-  }, 
+  },
   email: {
     type: String,
-    required:true,
+    required: true,
     unique: true
   },
   password: {
@@ -25,7 +27,11 @@ const UserSchema: Schema = new Schema({
     required: true,
     default: false
   }
-}, {timestamps: true})
+}, { timestamps: true });
+
+UserSchema.methods.matchPassword = async function (enteredPassword: string) {
+  return await bcrypt.compare(enteredPassword, this.password)
+};
 
 const User = mongoose.model<IUser>('User', UserSchema);
 

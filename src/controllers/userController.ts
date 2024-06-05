@@ -1,8 +1,7 @@
 import { RequestHandler } from "express";
 import User from '../models/users';
-import ErrorResponse from "../utils/errorResponse";
-
-
+import jwt from 'jsonwebtoken';
+import { env } from "process";
 interface UserType {
   _id: string,
   name: string,
@@ -11,34 +10,53 @@ interface UserType {
   isAdmin: boolean,
   __v: number,
   createdAt: string,
-  updatedAt: string
-}
+  updatedAt: string,
+  matchPassword?: (arg1: string) => Promise<boolean>
+} 
 
 interface DataType<T> {
-  data: T;
+  data?: T;
+  token?: string;
   message: string;
   count?: number;
 }
-
+console.log(jwt);
 
 // @desc: Auth User & get token
 // @route Post /api/v1/users/login
 // @access: Public
 
 const loginUser: RequestHandler = async (req, res, next) => {
-    const { email, password } = req.body;
-    const user: UserType | null = await User.findOne({ email });
-    if (user) {
-      const responseData: DataType<UserType> = {
-        data: user,
-        message: 'success'
-      };
-      res.json(responseData);
+  const { email, password } = req.body;
+  try {
+    const user: UserType | null  = await User.findOne({ email });
+    if (user && user.matchPassword) {
+      const passwordMatched = await user.matchPassword(password);
+      if (passwordMatched) {
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET as string,
+          {
+            expiresIn: '30d',
+          });
+        res.cookie('jwt', token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV !== 'development',
+          sameSite: 'strict',
+          maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+        })
+        const responseData: DataType<UserType> = {
+          token: token,
+          message: 'success'
+        };
+        res.json(responseData);
+      }
     }
-    else {
-       res.status(401);
+    res.status(401);
     throw new Error('Error happened above api link');
-    }
+  }
+  catch (error: any) {
+    res.status(401);
+    throw new Error(error.message);
+  }
 };
 
 // @desc: Register User

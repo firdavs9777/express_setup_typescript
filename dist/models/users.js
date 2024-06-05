@@ -22,8 +22,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const UserSchema = new mongoose_1.Schema({
     name: {
         type: String,
@@ -44,5 +48,8 @@ const UserSchema = new mongoose_1.Schema({
         default: false
     }
 }, { timestamps: true });
+UserSchema.methods.matchPassword = async function (enteredPassword) {
+    return await bcryptjs_1.default.compare(enteredPassword, this.password);
+};
 const User = mongoose_1.default.model('User', UserSchema);
 exports.default = User;
