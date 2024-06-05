@@ -13,7 +13,7 @@ interface DataType<T> {
 // @access: Public
 export const getProducts: RequestHandler = async (req, res, next) => {
     try {
-        const products = await Product.find();
+        const products:ProductType[] = await Product.find();
         const responseData: DataType<ProductType[]> = {
             count: products.length,
             data: products,
