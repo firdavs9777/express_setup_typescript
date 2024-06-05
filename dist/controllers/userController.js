@@ -10,6 +10,8 @@ const users_1 = __importDefault(require("../models/users"));
 // @access: Public
 const loginUser = async (req, res, next) => {
     const users = await users_1.default.find({});
+    // const responseData: DataType<UserType[]> = { 
+    // }
     res.send('Auth User');
     res.json(users);
 };
@@ -38,7 +40,7 @@ exports.logoutUser = logoutUser;
 const getUserProfile = async (req, res, next) => {
     const users = await users_1.default.find({});
     res.send('Get User Profile');
-    res.json(users);
+    res.json('hello');
 };
 exports.getUserProfile = getUserProfile;
 // @desc: Update User Profile
@@ -54,9 +56,18 @@ exports.updateUserProfile = updateUserProfile;
 // @route Get /api/v1/users
 // @access: Private/Admin
 const getUsers = async (req, res, next) => {
-    const users = await users_1.default.find({});
-    res.send('Get User Profile');
-    res.json(users);
+    try {
+        const users = await users_1.default.find();
+        const responseData = {
+            count: users.length,
+            data: users,
+            message: 'success'
+        };
+        res.json(responseData);
+    }
+    catch (error) {
+        res.status(404).json({ message: error.message });
+    }
 };
 exports.getUsers = getUsers;
 // @desc: Get User by ID  

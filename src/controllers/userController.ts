@@ -1,10 +1,24 @@
 import { RequestHandler } from "express";
 import User from '../models/users';
-interface DataType<T> {
+
+
+  interface UserType {
+    _id: string,
+    name: string,
+    email: string,
+    password: string,
+    isAdmin: boolean, 
+    __v: number,
+    createdAt: string,
+    updatedAt: string
+  }
+
+  interface DataType<T> {
     data: T;
     message: string;
     count?: number;
 }
+
 
 // @desc: Auth User & get token
 // @route Post /api/v1/users/login
@@ -12,6 +26,8 @@ interface DataType<T> {
 
 const loginUser: RequestHandler = async (req, res, next) => {
   const users = await User.find({});
+  // const responseData: DataType<UserType[]> = { 
+  // }
   res.send('Auth User');
   res.json(users);
 };
@@ -44,7 +60,7 @@ const logoutUser: RequestHandler = async (req, res, next) => {
 const getUserProfile: RequestHandler = async (req, res, next) => {
   const users = await User.find({});
   res.send('Get User Profile');
-  res.json(users);
+  res.json('hello');
 };
 
 // @desc: Update User Profile
@@ -62,10 +78,20 @@ const updateUserProfile: RequestHandler = async (req, res, next) => {
 // @access: Private/Admin
 
 const getUsers: RequestHandler = async (req, res, next) => {
-  const users = await User.find({});
-  res.send('Get User Profile');
-  res.json(users);
-};
+   try {
+        const users: UserType[] = await User.find();
+        const responseData: DataType<UserType[]> = {
+            count: users.length,
+            data: users,
+            message: 'success'
+        };
+        res.json(responseData);
+  }
+  catch(error:any) {
+    res.status(404).json({message:error.message})
+  }
+}
+
 
 // @desc: Get User by ID  
 // @route Get /api/v1/users/:id
