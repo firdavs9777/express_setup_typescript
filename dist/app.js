@@ -11,6 +11,7 @@ const app = (0, express_1.default)();
 const cors = require('cors');
 const error_1 = __importDefault(require("./middleware/error"));
 const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
+const cookie_parser_1 = __importDefault(require("cookie-parser"));
 // Dotenv implemented and imported
 dotenv_1.default.config();
 // Connect to Database 
@@ -20,6 +21,8 @@ app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 // app.use('/todos', todoRoutes);
 app.use(cors());
+// Cookie Parser Middleware
+app.use((0, cookie_parser_1.default)());
 app.use((err, req, res, next) => {
     res.status(500).json({ message: err.message });
 });

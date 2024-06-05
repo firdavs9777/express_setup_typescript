@@ -6,6 +6,7 @@ const app = express();
 const cors = require('cors');
 import errorHandler from './middleware/error';
 import UserRouter from './routes/userRoutes';
+import cookieParser from 'cookie-parser';
 
 // Dotenv implemented and imported
 dotenv.config();
@@ -16,6 +17,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // app.use('/todos', todoRoutes);
 app.use(cors());
+// Cookie Parser Middleware
+app.use(cookieParser());
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   res.status(500).json({ message: err.message });
