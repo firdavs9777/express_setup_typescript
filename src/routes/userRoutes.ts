@@ -4,7 +4,6 @@ import { loginUser, registerUser, logoutUser, getUsers, getUserById,getUserProfi
 const UserRouter = Router();
 
 UserRouter.get('/', getUsers).post('/', registerUser);
-UserRouter.get('/:id', getUserById);
 UserRouter.post('/logout', logoutUser);
 UserRouter.post('/login', loginUser);
 UserRouter.get('/profile', getUserProfile).put('/profile', updateUserProfile);
