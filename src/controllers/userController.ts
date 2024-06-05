@@ -1,22 +1,23 @@
 import { RequestHandler } from "express";
 import User from '../models/users';
+import ErrorResponse from "../utils/errorResponse";
 
 
-  interface UserType {
-    _id: string,
-    name: string,
-    email: string,
-    password: string,
-    isAdmin: boolean, 
-    __v: number,
-    createdAt: string,
-    updatedAt: string
-  }
+interface UserType {
+  _id: string,
+  name: string,
+  email: string,
+  password: string,
+  isAdmin: boolean,
+  __v: number,
+  createdAt: string,
+  updatedAt: string
+}
 
-  interface DataType<T> {
-    data: T;
-    message: string;
-    count?: number;
+interface DataType<T> {
+  data: T;
+  message: string;
+  count?: number;
 }
 
 
@@ -25,11 +26,19 @@ import User from '../models/users';
 // @access: Public
 
 const loginUser: RequestHandler = async (req, res, next) => {
-  const users = await User.find({});
-  // const responseData: DataType<UserType[]> = { 
-  // }
-  res.send('Auth User');
-  res.json(users);
+    const { email, password } = req.body;
+    const user: UserType | null = await User.findOne({ email });
+    if (user) {
+      const responseData: DataType<UserType> = {
+        data: user,
+        message: 'success'
+      };
+      res.json(responseData);
+    }
+    else {
+       res.status(401);
+    throw new Error('Error happened above api link');
+    }
 };
 
 // @desc: Register User
@@ -78,17 +87,18 @@ const updateUserProfile: RequestHandler = async (req, res, next) => {
 // @access: Private/Admin
 
 const getUsers: RequestHandler = async (req, res, next) => {
-   try {
-        const users: UserType[] = await User.find();
-        const responseData: DataType<UserType[]> = {
-            count: users.length,
-            data: users,
-            message: 'success'
-        };
-        res.json(responseData);
+  try {
+    const users: UserType[] = await User.find();
+    const responseData: DataType<UserType[]> = {
+      count: users.length,
+      data: users,
+      message: 'success'
+    };
+    res.json(responseData);
   }
-  catch(error:any) {
-    res.status(404).json({message:error.message})
+  catch (error: any) {
+    res.status(401);
+    throw new Error(error);
   }
 }
 
@@ -120,4 +130,4 @@ const updateUser: RequestHandler = async (req, res, next) => {
   res.send('Delete Users');
 };
 
-export {loginUser,registerUser,logoutUser,getUsers,getUserById, updateUser,updateUserProfile,deleteUser,getUserProfile}
+export { loginUser, registerUser, logoutUser, getUsers, getUserById, updateUser, updateUserProfile, deleteUser, getUserProfile }

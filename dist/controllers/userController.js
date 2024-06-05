@@ -9,11 +9,19 @@ const users_1 = __importDefault(require("../models/users"));
 // @route Post /api/v1/users/login
 // @access: Public
 const loginUser = async (req, res, next) => {
-    const users = await users_1.default.find({});
-    // const responseData: DataType<UserType[]> = { 
-    // }
-    res.send('Auth User');
-    res.json(users);
+    const { email, password } = req.body;
+    const user = await users_1.default.findOne({ email });
+    if (user) {
+        const responseData = {
+            data: user,
+            message: 'success'
+        };
+        res.json(responseData);
+    }
+    else {
+        res.status(401);
+        throw new Error('Error happened above api link');
+    }
 };
 exports.loginUser = loginUser;
 // @desc: Register User
@@ -66,7 +74,8 @@ const getUsers = async (req, res, next) => {
         res.json(responseData);
     }
     catch (error) {
-        res.status(404).json({ message: error.message });
+        res.status(401);
+        throw new Error(error);
     }
 };
 exports.getUsers = getUsers;
