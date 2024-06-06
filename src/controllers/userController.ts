@@ -7,15 +7,16 @@ interface UserType {
   name: string,
   email: string,
   password: string,
-  isAdmin: boolean,
-  __v: number,
-  createdAt: string,
-  updatedAt: string,
+  isAdmin?: boolean,
+  __v?: number,
+  createdAt?: string,
+  updatedAt?: string,
   matchPassword?: (arg1: string) => Promise<boolean>
-} 
+  save: () => Promise<UserType>
+}
 
 interface DataType<T> {
-  data?: T;
+  data?: T | any;
   token?: string;
   message: string;
   count?: number;
@@ -29,7 +30,7 @@ console.log(jwt);
 const loginUser: RequestHandler = async (req, res, next) => {
   const { email, password } = req.body;
   try {
-    const user: UserType | null  = await User.findOne({ email });
+    const user: UserType | null = await User.findOne({ email });
     if (user && user.matchPassword) {
       const passwordMatched = await user.matchPassword(password);
       if (passwordMatched) {
@@ -48,6 +49,8 @@ const loginUser: RequestHandler = async (req, res, next) => {
           message: 'success'
         };
         res.json(responseData);
+        console.log(responseData)
+        return;
       }
     }
     res.status(401);
@@ -64,9 +67,40 @@ const loginUser: RequestHandler = async (req, res, next) => {
 // @access: Public
 
 const registerUser: RequestHandler = async (req, res, next) => {
-  const users = await User.find({});
-  res.send('Register User');
-  res.json(users);
+  // const users = await User.find({});
+  // res.send('Register User');
+  // res.json(users);
+  const { name, email, password } = req.body;
+  try {
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      res.status(400).json({ message: 'User already exists' });
+      return;
+    }
+    const user = await User.create({ name, email, password });
+    if (user) {
+      const token: string = jwt.sign({ userId: user._id }, process.env.JWT_SECRET as string, {
+        expiresIn: '30d',
+      });
+      res.cookie('jwt', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== 'development',
+        sameSite: 'strict',
+        maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+      })
+      const responseData: DataType<UserType> = {
+        data: user,
+        token: token,
+
+        message: 'User registered successfully'
+      };
+      res.status(201).json(responseData);
+    } else {
+      res.status(400).json({ message: 'Invalid user data' });
+    }
+  } catch (error: any) {
+    res.status(400).json({ message: error.message });
+  }
 };
 
 
@@ -75,29 +109,74 @@ const registerUser: RequestHandler = async (req, res, next) => {
 // @access: Private
 
 const logoutUser: RequestHandler = async (req, res, next) => {
-  const users = await User.find({});
-  res.send('Logout User');
-  res.json(users);
+  res.cookie('jwt', '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV !== 'development',
+    sameSite: 'strict',
+    expires: new Date(0)
+  });
+  res.status(200).json({ message: 'Logged out successfully' });
 };
 
 // @desc: Get User Profile
 // @route Post /api/v1/users/profile
 // @access: Private
 
-const getUserProfile: RequestHandler = async (req, res, next) => {
-  const users = await User.find({});
-  res.send('Get User Profile');
-  res.json('hello');
+const getUserProfile: RequestHandler = async (req: any, res, next) => {
+  try {
+    const user: UserType | null = await User.findById(req.user._id);
+    if (user) {
+      res.status(200).json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        isAdmin: user.isAdmin
+      }
+      );
+      
+    }
+    else {
+      res.status(401);
+      throw new Error('Error happened above api link');
+    }
+  }
+  catch (error: any) {
+    res.status(401);
+    throw new Error(error.message);
+  }
+
 };
 
 // @desc: Update User Profile
 // @route Put /api/v1/users/profile
 // @access: Private
 
-const updateUserProfile: RequestHandler = async (req, res, next) => {
-  const users = await User.find({});
-  res.send('Get User Profile');
-  res.json(users);
+const updateUserProfile: RequestHandler = async (req:any, res, next) => {
+  try {
+    const user: UserType | null = await User.findById(req.user._id);
+    if (user) {
+      user.name = req.body.name || user.name;
+      user.email = req.body.email || user.email;    
+      if(req.body.password){
+        user.password = req.body.password;
+      }
+      const updateUser: UserType  =  await user.save();
+      res.status(200).json({
+        _id: updateUser._id,
+        name: updateUser.name,
+        email: updateUser.email,
+        isAdmin: updateUser.isAdmin
+      })
+    }
+    else {
+      res.status(401);
+      throw new Error('Error happened above api link');
+    }
+  }
+  catch (error: any) {
+    res.status(401);
+    throw new Error(error.message);
+  }
 };
 
 // @desc: Get Users
@@ -113,6 +192,7 @@ const getUsers: RequestHandler = async (req, res, next) => {
       message: 'success'
     };
     res.json(responseData);
+    return;
   }
   catch (error: any) {
     res.status(401);
@@ -127,7 +207,7 @@ const getUsers: RequestHandler = async (req, res, next) => {
 
 const getUserById: RequestHandler = async (req, res, next) => {
   const users = await User.find({});
-  res.send('Get User By Id');
+  res.send('Get User By Idd');
   res.json(users);
 };
 

@@ -3,11 +3,23 @@ import { loginUser, registerUser, logoutUser, getUsers, getUserById,getUserProfi
 import { protect, admin } from "../middleware/authMiddleware"
 const UserRouter = Router();
 
-UserRouter.get('/', getUsers).post('/', registerUser);
 UserRouter.post('/logout', logoutUser);
 UserRouter.post('/login', loginUser);
-UserRouter.use(protect);
-UserRouter.get('/profile', getUserProfile).put('/profile', updateUserProfile);
-UserRouter.use(admin);
-UserRouter.delete('/:id', deleteUser).get('/:id', getUserById).put('/:id', updateUser)
+UserRouter.post('/', registerUser);
+
+
+UserRouter.use(protect)
+UserRouter.get('/profile', getUserProfile)
+UserRouter.put('/profile', updateUserProfile);
+
+UserRouter.use(protect,admin)
+UserRouter.get('/', getUsers)
+
+UserRouter.use(protect,admin)
+UserRouter.delete('/:id', deleteUser)
+UserRouter.get('/:id', getUserById)
+UserRouter.put('/:id', updateUser)
+
+
+
 export default UserRouter;

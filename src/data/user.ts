@@ -4,7 +4,8 @@ export interface UserType {
     name: string,
     email: string,
     password: string,
-    isAdmin: boolean
+    isAdmin: boolean,
+    user?: string 
   }
   export const users: UserType[] = [
     {
