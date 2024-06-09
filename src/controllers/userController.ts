@@ -16,6 +16,7 @@ interface UserType {
 }
 
 interface DataType<T> {
+  name?: string,
   data?: T | any;
   token?: string;
   message: string;
@@ -45,6 +46,7 @@ const loginUser: RequestHandler = async (req, res, next) => {
           maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
         })
         const responseData: DataType<UserType> = {
+          name: user.name,
           token: token,
           message: 'success'
         };
