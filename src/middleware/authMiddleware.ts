@@ -38,7 +38,7 @@ const admin = (req: AuthenticatedRequest, res: Response, next: NextFunction) => 
     next();
   } else {
     res.status(401);
-    throw new Error('Not authorized as an admin');
+    throw new Error('Not authorized as an admin',);
   }
 };
 

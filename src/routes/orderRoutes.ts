@@ -13,13 +13,13 @@ const OrderRouter = Router();
 /// Orders without any admin or private middleware
 OrderRouter.post("/", addOrdersItems);
 // Orders with admin middleware
-OrderRouter.use(admin, protect);
+OrderRouter.use(protect, admin);
 OrderRouter.get("/", getAllOrders);
 OrderRouter.get("/:id", getOrderById);
 // Routes uses only protect middleware
 OrderRouter.use(protect);
 OrderRouter.put("/:id/pay", updateOrderToPaid);
 OrderRouter.put("/:id/deliver", updateOrderToDelivered);
-OrderRouter.get("/mine", getMyOrders);
+OrderRouter.get("/myorders", getMyOrders);
 
 export default OrderRouter;
