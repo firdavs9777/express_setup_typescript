@@ -6,19 +6,33 @@ const app = express();
 const cors = require("cors");
 import errorHandler from "./middleware/error";
 import UserRouter from "./routes/userRoutes";
-import cookieParser from "cookie-parser";
+
 import OrderRouter from "./routes/orderRoutes";
+const cookieParser = require('cookie-parser');
+
+
+
+출처: https://inpa.tistory.com/entry/EXPRESS-📚-bodyParser-cookieParser-미들웨어 [Inpa Dev 👨‍💻:티스토리]
 // Dotenv implemented and imported
 dotenv.config();
 // Connect to Database
 connectDB();
 // const port:number = parseInt(process.env.PORT || '5002', 10);
 app.use(express.json());
+
+const corsOptions = {
+  origin: true, // Change this to the origin(s) you want to allow.
+  credentials: true, // Indicates that cookies and credentials should be included.
+};
+
 app.use(express.urlencoded({ extended: true }));
-// app.use('/todos', todoRoutes);
-app.use(cors());
+
+app.use(cors(corsOptions));
 // Cookie Parser Middleware
 app.use(cookieParser());
+// app.use('/todos', todoRoutes);
+
+
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   res.status(500).json({ message: err.message });

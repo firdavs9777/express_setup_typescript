@@ -1,6 +1,7 @@
 import { RequestHandler } from "express";
 import Order from "../models/order";
 import Review from "../models/review";
+import { Console } from "console";
 
 interface DataType<T> {
   data: T;
@@ -8,22 +9,63 @@ interface DataType<T> {
   count?: number;
 }
 
+interface OrderItem {
+  name: string;
+  quantity: number;
+  image: string;
+  price: number;
+  product: string;
+}
+
+interface ShippingAddress {
+  address: string;
+  city: string;
+  postalCode: string;
+  country: string;
+}
+
+interface Order {
+  _id: string;
+  orderItems: OrderItem[];
+  shippingAddress: ShippingAddress;
+  paymentMethod: string;
+  itemsPrice: number;
+  taxPrice: number;
+  shippingPrice: number;
+  totalPrice: number;
+  user: {
+    name: string;
+    email: string;
+  };
+  isPaid: boolean;
+  paidAt?: string;
+  isDelivered: boolean;
+  deliveredAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+// interface OrderType {
+//   orderItems: []
+// }
+
 // @desc: Create new order
 // @route GET /api/v1/orders
 // @access: Private
-export const addOrdersItems: RequestHandler = async (req:any, res, next) => {
+export const addOrdersItems: RequestHandler = async (req: any, res, next) => {
+  console.log(req)
   try {
     const { orderItems, shippingAddress, paymentMethod, itemsPrice, taxPrice, shippingPrice, totalPrice } = req.body;
-
     if (!orderItems || orderItems.length === 0) {
       res.status(400);
       throw new Error('No order items');
     }
-
+ console.log('Request',req.user._id);
     const order = new Order({
-      orderItems: orderItems.map((x: any) => ({
+     
+      orderItems: orderItems && orderItems.map((x: any) => ({
         ...x, 
-        product: x._id
+        product: x._id,
+        _id: undefined
       })),
       user: req.user._id,
       shippingAddress,
@@ -38,6 +80,7 @@ export const addOrdersItems: RequestHandler = async (req:any, res, next) => {
 
     res.status(201).json(createdOrder);
   } catch (error) {
+    console.log(error);
     next(error); // Pass the error to the error handling middleware
   }
 };
@@ -59,6 +102,7 @@ catch (error) {
 // @route GET /api/v1/orders/:id
 // @access: Private
 export const getOrderById: RequestHandler = async (req, res, next) => {
+  console.log('Params', req.params);
   const order = await Order.findById(req.params.id).populate('user', 'name email');
   if (order)
   {
@@ -75,7 +119,20 @@ export const getOrderById: RequestHandler = async (req, res, next) => {
 // @route GET /api/v1/orders/:id/pay
 // @access: Private
 export const updateOrderToPaid: RequestHandler = async (req, res, next) => {
-  res.send("update order to paid");
+  
+  try {
+    const order = await Order.findById(req.params.id);
+    if (order)
+    {
+      order.isPaid = true;
+      order.paidAt = new Date();
+    }
+  }
+  catch {
+
+  }
+
+  // it will change the status to paid from not paid 
 };
 // @desc: Update order "IsDelivered" status to paid(true)
 // @route GET /api/v1/orders/:id/deliver
@@ -91,5 +148,15 @@ export const updateOrderToDelivered: RequestHandler = async (
 // @route GET /api/v1/orders
 // @access: Private/Admin
 export const getAllOrders: RequestHandler = async (req, res, next) => {
-  res.send("All orders");
+    try {
+        const orders = await Order.find();
+        const responseData = {
+            count: orders.length,
+            data: orders,
+            message: 'success'
+        };
+        res.json(responseData);
+    } catch (error: any) {
+        res.status(404).json({ message: error.message });
+    }
 };

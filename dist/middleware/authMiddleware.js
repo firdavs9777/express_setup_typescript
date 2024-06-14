@@ -12,13 +12,13 @@ const protect = (0, asyncHandler_1.default)(async (req, res, next) => {
     let token;
     // Read JWT from the 'jwt' cookie
     token = req.cookies.jwt;
+    console.log(token);
+    console.log(req.cookies);
     if (token) {
         try {
             const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
-            const user = await users_1.default.findById(decoded.userId).select('-password');
-            if (req && req.user) {
-                next();
-            }
+            req.user = await users_1.default.findById(decoded.userId).select('-password');
+            next();
         }
         catch (error) {
             res.status(401);

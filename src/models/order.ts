@@ -43,13 +43,13 @@ user:{
 orderItems: [
     {
         name:{type: String, required: true},
-        quanity:{type: Number, required: true},
+        quantity:{type: Number, required: true},
         image:{type: String, required: true},
         price:{type: Number, required: true},
-        product: {type: Schema.Types.ObjectId, required: true, ref:'Order'},
+        product: {type: Schema.Types.ObjectId, required: false, ref:'Product'},
     }
 ], 
-shippingAddres: {
+shippingAddress: {
     address: {type: String, required: true},
     city: {type: String, required: true},
     postalCode: {type: String, required: true},
