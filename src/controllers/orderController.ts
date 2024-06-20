@@ -52,14 +52,14 @@ interface Order {
 // @route GET /api/v1/orders
 // @access: Private
 export const addOrdersItems: RequestHandler = async (req: any, res, next) => {
-  console.log(req)
+  
   try {
     const { orderItems, shippingAddress, paymentMethod, itemsPrice, taxPrice, shippingPrice, totalPrice } = req.body;
     if (!orderItems || orderItems.length === 0) {
       res.status(400);
       throw new Error('No order items');
     }
- console.log('Request',req.user._id);
+
     const order = new Order({
      
       orderItems: orderItems && orderItems.map((x: any) => ({
@@ -80,7 +80,7 @@ export const addOrdersItems: RequestHandler = async (req: any, res, next) => {
 
     res.status(201).json(createdOrder);
   } catch (error) {
-    console.log(error);
+   
     next(error); // Pass the error to the error handling middleware
   }
 };
@@ -102,7 +102,7 @@ catch (error) {
 // @route GET /api/v1/orders/:id
 // @access: Private
 export const getOrderById: RequestHandler = async (req, res, next) => {
-  console.log('Params', req.params);
+
   const order = await Order.findById(req.params.id).populate('user', 'name email');
   if (order)
   {
@@ -115,17 +115,32 @@ export const getOrderById: RequestHandler = async (req, res, next) => {
 
 };
 
+
+
 // @desc: Update order "IsPaid" status to paid(true)
 // @route GET /api/v1/orders/:id/pay
 // @access: Private
 export const updateOrderToPaid: RequestHandler = async (req, res, next) => {
-  
   try {
+    // updating current order
     const order = await Order.findById(req.params.id);
     if (order)
     {
       order.isPaid = true;
       order.paidAt = new Date();
+      order.paymentResult = {
+        id: req.body.id,
+        status: req.body.status,
+        update_time: req.body.update_time,
+        email_address: req.body.email_address
+      }
+      const updateOrder = await order.save();
+  
+      res.status(200).json(updateOrder);
+    }
+    else {
+      res.status(404);
+      throw new Error('Order not found');
     }
   }
   catch {

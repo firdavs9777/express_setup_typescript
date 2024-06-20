@@ -22,7 +22,7 @@ interface DataType<T> {
   message: string;
   count?: number;
 }
-console.log(jwt);
+
 
 // @desc: Auth User & get token
 // @route Post /api/v1/users/login
@@ -51,7 +51,7 @@ const loginUser: RequestHandler = async (req, res, next) => {
           message: 'success'
         };
         res.json(responseData);
-        console.log(responseData)
+     
         return;
       }
     }

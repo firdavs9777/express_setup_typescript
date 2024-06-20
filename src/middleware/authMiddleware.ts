@@ -14,14 +14,12 @@ const protect = async (req: any, res: Response, next: NextFunction) => {
 
   // Read JWT from the 'jwt' cookie
   token = req.cookies.jwt;
-  console.log('Token',token);
   if (token) {
     try {
       //    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
 
       // req.user = await User.findById((decoded as any).userId);
       const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {userId: string};
-      console.log('Decoded', decoded);
       let test = await User.findById(decoded.userId as string).select('-password');
       req.user = test;
       next();
