@@ -1,11 +1,11 @@
 import { Router } from "express";
 import {
   getAllOrders,
-  getMyOrders,
   getOrderById,
   updateOrderToDelivered,
   updateOrderToPaid,
   addOrdersItems,
+  getMyOrders
 } from "../controllers/orderController";
 import { admin, protect } from "../middleware/authMiddleware";
 
@@ -22,7 +22,9 @@ OrderRouter.get("/:id", getOrderById);
 // Routes uses only protect middleware
 OrderRouter.use(protect);
 OrderRouter.put("/:id/pay", updateOrderToPaid);
+OrderRouter.use(protect);
 OrderRouter.put("/:id/deliver", updateOrderToDelivered);
-OrderRouter.get("/myorders", getMyOrders);
+OrderRouter.use(protect);
+OrderRouter.get("/mine", getMyOrders);
 
 export default OrderRouter;

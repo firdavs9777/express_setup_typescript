@@ -90,11 +90,11 @@ export const addOrdersItems: RequestHandler = async (req: any, res, next) => {
 // @access: Private
 export const getMyOrders: RequestHandler = async (req: any, res, next) => {
   try {
-    const orders = Order.find({ user: req.user._id });
-    res.status(200).json(orders);
-  }
-catch (error) {
-    next(error); // Pass the error to the error handling middleware
+    const orders = await Order.findById({ user: req.user._id });
+    res.json(orders);
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    next(error); // Pass the error to the next middleware for proper error handling
   }
 };
 
