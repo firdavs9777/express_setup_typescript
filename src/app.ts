@@ -1,3 +1,4 @@
+import path from "path";
 import express, { Request, Response, NextFunction } from "express";
 import dotenv from "dotenv";
 import connectDB from "./config/db";
@@ -6,11 +7,11 @@ const app = express();
 const cors = require("cors");
 import errorHandler from "./middleware/error";
 import UserRouter from "./routes/userRoutes";
-
+import UploadRouter from './routes/uploadRoutes';
 import OrderRouter from "./routes/orderRoutes";
 const cookieParser = require('cookie-parser');
 
-
+path.resolve();
 
 // 출처:
 // https://inpa.tistory.com/entry/EXPRESS-📚-bodyParser-cookieParser-미들웨어 [Inpa Dev 👨‍💻:티스토리]
@@ -41,8 +42,14 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 app.use("/api/v1/products", ProductRouter);
 app.use("/api/v1/users", UserRouter);
 app.use("/api/v1/orders", OrderRouter);
+
 // paypal url
 app.get('/api/v1/config/paypal', (req, res) => res.send({cliendId: process.env.PAYPAL_CLIENT_ID}))
+
+app.use('/uploads', express.static("uploads"));
+app.use('/api/v1/upload', UploadRouter);
 app.use(errorHandler);
 
-app.listen(5004, () => console.log(`Server is running on port ${5004}`));
+
+
+app.listen(5005, () => console.log(`Server is running on port ${5005}`));

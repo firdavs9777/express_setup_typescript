@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getUserProfile = exports.deleteUser = exports.updateUserProfile = exports.updateUser = exports.getUserById = exports.getUsers = exports.logoutUser = exports.registerUser = exports.loginUser = void 0;
 const users_1 = __importDefault(require("../models/users"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-console.log(jsonwebtoken_1.default);
 // @desc: Auth User & get token
 // @route Post /api/v1/users/login
 // @access: Public
@@ -28,11 +27,11 @@ const loginUser = async (req, res, next) => {
                 });
                 const responseData = {
                     name: user.name,
+                    isAdmin: user.isAdmin,
                     token: token,
                     message: 'success'
                 };
                 res.json(responseData);
-                console.log(responseData);
                 return;
             }
         }

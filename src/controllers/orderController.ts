@@ -90,7 +90,7 @@ export const addOrdersItems: RequestHandler = async (req: any, res, next) => {
 // @access: Private
 export const getMyOrders: RequestHandler = async (req: any, res, next) => {
   try {
-    const orders = await Order.findById({ user: req.user._id });
+    const orders = await Order.find({ user: req.user._id });
     res.json(orders);
   } catch (error) {
     console.error('Error fetching orders:', error);
@@ -157,6 +157,20 @@ export const updateOrderToDelivered: RequestHandler = async (
   res,
   next
 ) => {
+
+
+  const order = await Order.findById(req.params.id);
+  if (order) {
+    order.isDelivered = true;
+    order.deliveredAt = new Date();
+    const updateOrder = await order.save();
+    res.status(200).json(updateOrder);
+  }
+  else {
+    res.status(404);
+    throw new Error('Order not found')
+  }
+
   res.send("update order to delivered");
 };
 // @desc: Get all orders
@@ -164,7 +178,7 @@ export const updateOrderToDelivered: RequestHandler = async (
 // @access: Private/Admin
 export const getAllOrders: RequestHandler = async (req, res, next) => {
     try {
-        const orders = await Order.find();
+        const orders = await Order.find({}).populate('user', 'id name');
         const responseData = {
             count: orders.length,
             data: orders,

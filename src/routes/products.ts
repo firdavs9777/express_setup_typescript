@@ -1,8 +1,13 @@
 import { Router } from 'express';
-import { getProduct, getProducts } from '../controllers/products';
+import { createProduct, getProduct, getProducts, updateProduct } from '../controllers/products';
+import { admin, protect } from '../middleware/authMiddleware';
 
 const ProductRouter = Router();
 
 ProductRouter.get('/', getProducts);
-ProductRouter.get('/:id', getProduct);
+
+ProductRouter.use(protect, admin)
+ProductRouter.get('/:id', getProduct)
+ProductRouter.put('/:id',updateProduct);
+ProductRouter.post('/', createProduct)
 export default ProductRouter;

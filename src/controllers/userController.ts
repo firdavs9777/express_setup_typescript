@@ -18,6 +18,7 @@ interface UserType {
 interface DataType<T> {
   name?: string,
   data?: T | any;
+  isAdmin?: boolean,
   token?: string;
   message: string;
   count?: number;
@@ -47,6 +48,7 @@ const loginUser: RequestHandler = async (req, res, next) => {
         })
         const responseData: DataType<UserType> = {
           name: user.name,
+          isAdmin: user.isAdmin,
           token: token,
           message: 'success'
         };
