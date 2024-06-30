@@ -2,7 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const products_1 = require("../controllers/products");
+const authMiddleware_1 = require("../middleware/authMiddleware");
 const ProductRouter = (0, express_1.Router)();
 ProductRouter.get('/', products_1.getProducts);
+ProductRouter.use(authMiddleware_1.protect, authMiddleware_1.admin);
 ProductRouter.get('/:id', products_1.getProduct);
+ProductRouter.put('/:id', products_1.updateProduct);
+ProductRouter.post('/', products_1.createProduct);
 exports.default = ProductRouter;

@@ -3,26 +3,27 @@ import asyncHandler from './asyncHandler';
 import User from '../models/users';
 import { Request, Response, NextFunction } from 'express';
 import { UserType } from '../data/user';
-import { RequestHandler } from 'express';
 
 
 interface AuthenticatedRequest extends Request {
   user?: UserType;
 }
 // User must be authenticated protect routes
-const protect: RequestHandler = async (req:Request | any, res, next) => {
+const protect = async (req: any, res: Response, next: NextFunction) => {
   let token;
 
   // Read JWT from the 'jwt' cookie
   token = req.cookies.jwt;
-
   if (token) {
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as jwt.JwtPayload;
-        req.user = await User.findById(decoded.userId).select('-password');   
-        next();         
-      }
-     catch (error) {
+      //    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
+
+      // req.user = await User.findById((decoded as any).userId);
+      const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {userId: string};
+      let test = await User.findById(decoded.userId as string).select('-password');
+      req.user = test;
+      next();
+    } catch (error) {
       res.status(401);
       throw new Error('Not authorized, token failed');
     }
@@ -33,12 +34,13 @@ const protect: RequestHandler = async (req:Request | any, res, next) => {
 };
 
 // User must be an admin
-const admin = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+const admin = (req: any, res: Response, next: NextFunction) => {
+  console.log(req.user);
   if (req.user && req.user.isAdmin) {
     next();
   } else {
     res.status(401);
-    throw new Error('Not authorized as an admin',);
+    throw new Error('Not authorized as an admin');
   }
 };
 

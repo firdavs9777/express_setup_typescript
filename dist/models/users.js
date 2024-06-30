@@ -51,5 +51,12 @@ const UserSchema = new mongoose_1.Schema({
 UserSchema.methods.matchPassword = async function (enteredPassword) {
     return await bcryptjs_1.default.compare(enteredPassword, this.password);
 };
+UserSchema.pre('save', async function (next) {
+    if (!this.isModified('password')) {
+        next();
+    }
+    const salt = await bcryptjs_1.default.genSalt(10);
+    this.password = await bcryptjs_1.default.hash(this.password, salt);
+});
 const User = mongoose_1.default.model('User', UserSchema);
 exports.default = User;

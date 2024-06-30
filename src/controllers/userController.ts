@@ -18,11 +18,12 @@ interface UserType {
 interface DataType<T> {
   name?: string,
   data?: T | any;
+  isAdmin?: boolean,
   token?: string;
   message: string;
   count?: number;
 }
-console.log(jwt);
+
 
 // @desc: Auth User & get token
 // @route Post /api/v1/users/login
@@ -47,11 +48,12 @@ const loginUser: RequestHandler = async (req, res, next) => {
         })
         const responseData: DataType<UserType> = {
           name: user.name,
+          isAdmin: user.isAdmin,
           token: token,
           message: 'success'
         };
         res.json(responseData);
-        console.log(responseData)
+     
         return;
       }
     }

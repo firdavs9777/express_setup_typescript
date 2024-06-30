@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getUserProfile = exports.deleteUser = exports.updateUserProfile = exports.updateUser = exports.getUserById = exports.getUsers = exports.logoutUser = exports.registerUser = exports.loginUser = void 0;
 const users_1 = __importDefault(require("../models/users"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-console.log(jsonwebtoken_1.default);
 // @desc: Auth User & get token
 // @route Post /api/v1/users/login
 // @access: Public
@@ -27,10 +26,13 @@ const loginUser = async (req, res, next) => {
                     maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
                 });
                 const responseData = {
+                    name: user.name,
+                    isAdmin: user.isAdmin,
                     token: token,
                     message: 'success'
                 };
                 res.json(responseData);
+                return;
             }
         }
         res.status(401);
@@ -46,36 +48,110 @@ exports.loginUser = loginUser;
 // @route Post /api/v1/users/register
 // @access: Public
 const registerUser = async (req, res, next) => {
-    const users = await users_1.default.find({});
-    res.send('Register User');
-    res.json(users);
+    // const users = await User.find({});
+    // res.send('Register User');
+    // res.json(users);
+    const { name, email, password } = req.body;
+    try {
+        const userExists = await users_1.default.findOne({ email });
+        if (userExists) {
+            res.status(400).json({ message: 'User already exists' });
+            return;
+        }
+        const user = await users_1.default.create({ name, email, password });
+        if (user) {
+            const token = jsonwebtoken_1.default.sign({ userId: user._id }, process.env.JWT_SECRET, {
+                expiresIn: '30d',
+            });
+            res.cookie('jwt', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV !== 'development',
+                sameSite: 'strict',
+                maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+            });
+            const responseData = {
+                data: user,
+                token: token,
+                message: 'User registered successfully'
+            };
+            res.status(201).json(responseData);
+        }
+        else {
+            res.status(400).json({ message: 'Invalid user data' });
+        }
+    }
+    catch (error) {
+        res.status(400).json({ message: error.message });
+    }
 };
 exports.registerUser = registerUser;
 // @desc: Logout User
 // @route Post /api/v1/users/logout
 // @access: Private
 const logoutUser = async (req, res, next) => {
-    const users = await users_1.default.find({});
-    res.send('Logout User');
-    res.json(users);
+    res.cookie('jwt', '', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== 'development',
+        sameSite: 'strict',
+        expires: new Date(0)
+    });
+    res.status(200).json({ message: 'Logged out successfully' });
 };
 exports.logoutUser = logoutUser;
 // @desc: Get User Profile
 // @route Post /api/v1/users/profile
 // @access: Private
 const getUserProfile = async (req, res, next) => {
-    const users = await users_1.default.find({});
-    res.send('Get User Profile');
-    res.json('hello');
+    try {
+        const user = await users_1.default.findById(req.user._id);
+        if (user) {
+            res.status(200).json({
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                isAdmin: user.isAdmin
+            });
+        }
+        else {
+            res.status(401);
+            throw new Error('Error happened above api link');
+        }
+    }
+    catch (error) {
+        res.status(401);
+        throw new Error(error.message);
+    }
 };
 exports.getUserProfile = getUserProfile;
 // @desc: Update User Profile
 // @route Put /api/v1/users/profile
 // @access: Private
 const updateUserProfile = async (req, res, next) => {
-    const users = await users_1.default.find({});
-    res.send('Get User Profile');
-    res.json(users);
+    try {
+        const user = await users_1.default.findById(req.user._id);
+        if (user) {
+            user.name = req.body.name || user.name;
+            user.email = req.body.email || user.email;
+            if (req.body.password) {
+                user.password = req.body.password;
+            }
+            const updateUser = await user.save();
+            res.status(200).json({
+                _id: updateUser._id,
+                name: updateUser.name,
+                email: updateUser.email,
+                isAdmin: updateUser.isAdmin
+            });
+        }
+        else {
+            res.status(401);
+            throw new Error('Error happened above api link');
+        }
+    }
+    catch (error) {
+        res.status(401);
+        throw new Error(error.message);
+    }
 };
 exports.updateUserProfile = updateUserProfile;
 // @desc: Get Users
@@ -90,6 +166,7 @@ const getUsers = async (req, res, next) => {
             message: 'success'
         };
         res.json(responseData);
+        return;
     }
     catch (error) {
         res.status(401);
@@ -102,7 +179,7 @@ exports.getUsers = getUsers;
 // @access: Private/Admin
 const getUserById = async (req, res, next) => {
     const users = await users_1.default.find({});
-    res.send('Get User By Id');
+    res.send('Get User By Idd');
     res.json(users);
 };
 exports.getUserById = getUserById;

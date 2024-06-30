@@ -24,7 +24,6 @@ const importData = async () => {
             return { ...product, user: adminUser };
         });
         await product_1.default.insertMany(sampleProducts);
-        console.log('Data Imported!');
         process.exit(1);
     }
     catch (error) {
