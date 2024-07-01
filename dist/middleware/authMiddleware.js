@@ -33,7 +33,6 @@ const protect = async (req, res, next) => {
 exports.protect = protect;
 // User must be an admin
 const admin = (req, res, next) => {
-    console.log(req.user);
     if (req.user && req.user.isAdmin) {
         next();
     }

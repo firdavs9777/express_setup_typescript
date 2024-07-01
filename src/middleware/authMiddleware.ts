@@ -35,7 +35,6 @@ const protect = async (req: any, res: Response, next: NextFunction) => {
 
 // User must be an admin
 const admin = (req: any, res: Response, next: NextFunction) => {
-  console.log(req.user);
   if (req.user && req.user.isAdmin) {
     next();
   } else {
