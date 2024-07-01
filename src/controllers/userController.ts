@@ -29,7 +29,7 @@ interface DataType<T> {
 // @route Post /api/v1/users/login
 // @access: Public
 
-const loginUser: RequestHandler = async (req, res, next) => {
+export const loginUser: RequestHandler = async (req, res, next) => {
   const { email, password } = req.body;
   try {
     const user: UserType | null = await User.findOne({ email });
@@ -53,7 +53,7 @@ const loginUser: RequestHandler = async (req, res, next) => {
           message: 'success'
         };
         res.json(responseData);
-     
+
         return;
       }
     }
@@ -70,7 +70,7 @@ const loginUser: RequestHandler = async (req, res, next) => {
 // @route Post /api/v1/users/register
 // @access: Public
 
-const registerUser: RequestHandler = async (req, res, next) => {
+export const registerUser: RequestHandler = async (req, res, next) => {
   // const users = await User.find({});
   // res.send('Register User');
   // res.json(users);
@@ -112,7 +112,7 @@ const registerUser: RequestHandler = async (req, res, next) => {
 // @route Post /api/v1/users/logout
 // @access: Private
 
-const logoutUser: RequestHandler = async (req, res, next) => {
+export const logoutUser: RequestHandler = async (req, res, next) => {
   res.cookie('jwt', '', {
     httpOnly: true,
     secure: process.env.NODE_ENV !== 'development',
@@ -126,7 +126,7 @@ const logoutUser: RequestHandler = async (req, res, next) => {
 // @route Post /api/v1/users/profile
 // @access: Private
 
-const getUserProfile: RequestHandler = async (req: any, res, next) => {
+export const getUserProfile: RequestHandler = async (req: any, res, next) => {
   try {
     const user: UserType | null = await User.findById(req.user._id);
     if (user) {
@@ -137,7 +137,7 @@ const getUserProfile: RequestHandler = async (req: any, res, next) => {
         isAdmin: user.isAdmin
       }
       );
-      
+
     }
     else {
       res.status(401);
@@ -155,16 +155,16 @@ const getUserProfile: RequestHandler = async (req: any, res, next) => {
 // @route Put /api/v1/users/profile
 // @access: Private
 
-const updateUserProfile: RequestHandler = async (req:any, res, next) => {
+export const updateUserProfile: RequestHandler = async (req: any, res, next) => {
   try {
     const user: UserType | null = await User.findById(req.user._id);
     if (user) {
       user.name = req.body.name || user.name;
-      user.email = req.body.email || user.email;    
-      if(req.body.password){
+      user.email = req.body.email || user.email;
+      if (req.body.password) {
         user.password = req.body.password;
       }
-      const updateUser: UserType  =  await user.save();
+      const updateUser: UserType = await user.save();
       res.status(200).json({
         _id: updateUser._id,
         name: updateUser.name,
@@ -187,7 +187,7 @@ const updateUserProfile: RequestHandler = async (req:any, res, next) => {
 // @route Get /api/v1/users
 // @access: Private/Admin
 
-const getUsers: RequestHandler = async (req, res, next) => {
+export const getUsers: RequestHandler = async (req, res, next) => {
   try {
     const users: UserType[] = await User.find();
     const responseData: DataType<UserType[]> = {
@@ -209,18 +209,42 @@ const getUsers: RequestHandler = async (req, res, next) => {
 // @route Get /api/v1/users/:id
 // @access: Private/Admin
 
-const getUserById: RequestHandler = async (req, res, next) => {
-  const users = await User.find({});
-  res.send('Get User By Idd');
-  res.json(users);
+export const getUserById: RequestHandler = async (req, res, next) => {
+  const user: any = await User.findById(req.params.id).select('-password');
+  if (user) {
+    res.status(200).json(user);
+  }
+  else {
+    res.status(404); throw new Error('User not found');
+  }
+
 };
 
 // @desc: Delete single user by id
 // @route DELETE /api/v1/users/:id
 // @access: Private/Admin
 
-const deleteUser: RequestHandler = async (req, res, next) => {
-  res.send('Delete Users');
+export const deleteUser: RequestHandler = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (user) {
+      if (user.isAdmin) {
+        res.status(400);
+        throw new Error('Cannot delete admin user');
+      }
+      await User.deleteOne({ _id: user._id });
+      res.status(200).json({ message: 'User deleted successfully' });
+    }
+    else {
+      res.status(404);
+      throw new Error('User not found')
+    }
+
+  }
+  catch (error: any) {
+    res.status(404);
+    throw new Error('Error happened please check the api')
+  }
 };
 
 
@@ -228,8 +252,30 @@ const deleteUser: RequestHandler = async (req, res, next) => {
 // @route PUT /api/v1/users/:id
 // @access: Private/Admin
 
-const updateUser: RequestHandler = async (req, res, next) => {
-  res.send('Delete Users');
+export const updateUser: RequestHandler = async (req, res, next) => {
+  try {
+    const user: any = await User.findById(req.params.id);
+    if (user)
+    {
+      user.name = req.body.name || user.name;
+      user.email = req.body.email || user.email; 
+      user.isAdmin = Boolean(req.body.isAdmin);
+      const updatedUser = await user.save();
+      res.status(200).json({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        isAdmin: updatedUser.isAdmin
+      });
+    }
+    else {
+      res.status(404);
+      throw new Error(`User not found with ${req.params.id}`);
+    }
+  }
+   catch (error: any) {
+    res.status(404);
+    throw new Error('Error happened please check the api')
+  }
+  
 };
-
-export { loginUser, registerUser, logoutUser, getUsers, getUserById, updateUser, updateUserProfile, deleteUser, getUserProfile }

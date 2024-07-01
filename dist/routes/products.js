@@ -8,5 +8,7 @@ ProductRouter.get('/', products_1.getProducts);
 ProductRouter.use(authMiddleware_1.protect, authMiddleware_1.admin);
 ProductRouter.get('/:id', products_1.getProduct);
 ProductRouter.put('/:id', products_1.updateProduct);
+ProductRouter.use(authMiddleware_1.protect, authMiddleware_1.admin);
+ProductRouter.delete('/:id', products_1.deleteProduct);
 ProductRouter.post('/', products_1.createProduct);
 exports.default = ProductRouter;

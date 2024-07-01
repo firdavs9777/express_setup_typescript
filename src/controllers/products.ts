@@ -114,5 +114,15 @@ export const updateProduct: RequestHandler = async (req: any, res, next) => {
 // @route DELETE /api/v1/products/:id
 // @access: Private/ Admin
 export const deleteProduct: RequestHandler = async (req: any, res, next) => {
-  
+    try {
+        const product = await Product.findById(req.params.id);
+        if (product)
+        {
+            await Product.deleteOne({ _id: req.params.id });
+            res.status(200).json({ message: 'Product Delete successfully' });
+         }
+    }
+    catch (error: any) {
+        res.status(400); throw new Error('Resource not found');
+    }
 };

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserProfile = exports.deleteUser = exports.updateUserProfile = exports.updateUser = exports.getUserById = exports.getUsers = exports.logoutUser = exports.registerUser = exports.loginUser = void 0;
+exports.updateUser = exports.deleteUser = exports.getUserById = exports.getUsers = exports.updateUserProfile = exports.getUserProfile = exports.logoutUser = exports.registerUser = exports.loginUser = void 0;
 const users_1 = __importDefault(require("../models/users"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 // @desc: Auth User & get token
@@ -178,22 +178,67 @@ exports.getUsers = getUsers;
 // @route Get /api/v1/users/:id
 // @access: Private/Admin
 const getUserById = async (req, res, next) => {
-    const users = await users_1.default.find({});
-    res.send('Get User By Idd');
-    res.json(users);
+    const user = await users_1.default.findById(req.params.id).select('-password');
+    if (user) {
+        res.status(200).json(user);
+    }
+    else {
+        res.status(404);
+        throw new Error('User not found');
+    }
 };
 exports.getUserById = getUserById;
 // @desc: Delete single user by id
 // @route DELETE /api/v1/users/:id
 // @access: Private/Admin
 const deleteUser = async (req, res, next) => {
-    res.send('Delete Users');
+    try {
+        const user = await users_1.default.findById(req.params.id);
+        if (user) {
+            if (user.isAdmin) {
+                res.status(400);
+                throw new Error('Cannot delete admin user');
+            }
+            await users_1.default.deleteOne({ _id: user._id });
+            res.status(200).json({ message: 'User deleted successfully' });
+        }
+        else {
+            res.status(404);
+            throw new Error('User not found');
+        }
+    }
+    catch (error) {
+        res.status(404);
+        throw new Error('Error happened please check the api');
+    }
 };
 exports.deleteUser = deleteUser;
 // @desc: Update single user by id
 // @route PUT /api/v1/users/:id
 // @access: Private/Admin
 const updateUser = async (req, res, next) => {
-    res.send('Delete Users');
+    try {
+        const user = await users_1.default.findById(req.params.id);
+        if (user) {
+            user.name = req.body.name || user.name;
+            user.email = req.body.email || user.email;
+            user.isAdmin = Boolean(req.body.isAdmin);
+            const updatedUser = await user.save();
+            res.status(200).json({
+                _id: updatedUser._id,
+                name: updatedUser.name,
+                email: updatedUser.email,
+                isAdmin: updatedUser.isAdmin
+            });
+        }
+        else {
+            res.status(404);
+            throw new Error(`User not found with ${req.params.id}`);
+        }
+    }
+    catch (error) {
+        res.status(404);
+        throw new Error('Error happened please check the api');
+    }
 };
 exports.updateUser = updateUser;
