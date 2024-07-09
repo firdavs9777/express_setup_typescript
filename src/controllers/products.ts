@@ -1,6 +1,7 @@
 import { RequestHandler } from 'express';
 import Product from '../models/product';
 import { ProductType } from '../data/products';
+import { IReview } from '../models/review';
 
 interface DataType<T> {
     data: T;
@@ -13,7 +14,7 @@ interface DataType<T> {
 // @access: Public
 export const getProducts: RequestHandler = async (req, res, next) => {
     try {
-        const products:ProductType[] = await Product.find();
+        const products: ProductType[] = await Product.find();
         const responseData: DataType<ProductType[]> = {
             count: products.length,
             data: products,
@@ -30,7 +31,7 @@ export const getProducts: RequestHandler = async (req, res, next) => {
 // @access: Private
 export const getProduct: RequestHandler = async (req, res, next) => {
     const productId: string = req.params.id;
-    
+
     try {
         const product = await Product.findById(productId);
         if (!product) {
@@ -63,8 +64,8 @@ export const createProduct: RequestHandler = async (req: any, res, next) => {
         category: 'Sample Category',
         countInStock: 10,
         numReviews: 0,
-        rating:10,
-        description:'Sample Description'
+        rating: 10,
+        description: 'Sample Description'
     });
     const createdProduct = await product.save();
     console.log(createProduct);
@@ -116,13 +117,44 @@ export const updateProduct: RequestHandler = async (req: any, res, next) => {
 export const deleteProduct: RequestHandler = async (req: any, res, next) => {
     try {
         const product = await Product.findById(req.params.id);
-        if (product)
-        {
+        if (product) {
             await Product.deleteOne({ _id: req.params.id });
             res.status(200).json({ message: 'Product Delete successfully' });
-         }
+        }
     }
     catch (error: any) {
         res.status(400); throw new Error('Resource not found');
+    }
+};
+
+// @desc: Create a new review
+// @route POST /api/v1/products/:id/reviews
+// @access: Private/ Admin
+export const createProductReview: RequestHandler = async (req: any, res, next) => {
+    const { rating, comment } = req.body;
+    const product = await Product.findById(req.params.id);
+    if (product) {
+        const alreadyReviewed = product.reviews.find((r: IReview) => r.user.toString() === req.user._id.toString());
+        if (alreadyReviewed) {
+            res.status(400);
+            throw new Error('Product already reviewed');
+        }
+        const review = {
+            name: req.user.name,
+            rating: Number(rating),
+            comment,
+            user: req.user._id
+        }
+        product.reviews.push(review as IReview);
+        product.numReviews = product.reviews.length;
+        product.rating =
+            product.reviews.reduce((acc, item) => item.rating + acc, 0) /
+            product.reviews.length;
+
+        await product.save();
+        res.status(201).json({ message: 'Review added' });
+    } else {
+        res.status(404);
+        throw new Error('Product not found');
     }
 };
